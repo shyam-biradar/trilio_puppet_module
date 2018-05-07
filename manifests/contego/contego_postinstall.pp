@@ -22,10 +22,47 @@ class trilio::contego::contego_postinstall inherits trilio::contego {
 ##Create /etc/tvault-contego/ directory and tvault-contego.conf
     file { '/etc/tvault-contego/':
         ensure => 'directory',
-    }->
-    file { "/etc/tvault-contego/tvault-contego.conf":
-        ensure  => present,
-        content => $contego_conf_file_content,
+    }
+
+##Create contego conf file
+
+    if $backup_target_type == 'nfs' {
+        file { "/etc/tvault-contego/tvault-contego.conf":
+            ensure  => present,
+            content => $contego_conf_nfs,
+        }    
+    }
+    elsif $backup_target_type == 'swift' {
+        file { "/etc/tvault-contego/tvault-contego.conf":
+            ensure  => present,
+            content => $contego_conf_swift,
+        }
+    }
+    elsif $backup_target_type == 's3' {
+        if $s3_type == 'amazon_s3' {
+            file { "/etc/tvault-contego/tvault-contego.conf":
+                ensure  => present,
+                content => $contego_conf_amazon_s3,
+            }    
+        }
+        elsif $s3_type == 'ceph_s3' {
+            file { "/etc/tvault-contego/tvault-contego.conf":
+                ensure  => present,
+                content => $contego_conf_ceph_s3,
+            }    
+        }
+        elsif $s3_type == 'minio_s3' {
+            file { "/etc/tvault-contego/tvault-contego.conf":
+                ensure  => present,
+                content => $contego_conf_minio_s3,
+            }
+        }
+        else {
+            fail("s3_type is not valid")
+        }
+    }
+    else {
+         fail("backup_target_type is not valid")
     }
 
 ##Create log rorate file for contego log rotation: /etc/logrotate.d/tvault-contego
@@ -34,9 +71,29 @@ class trilio::contego::contego_postinstall inherits trilio::contego {
     }
 
 ##Create systemd file for tvault-contego service: /etc/systemd/system/tvault-contego.service
+
     file { '/etc/systemd/system/tvault-contego.service':
+        ensure  => present,
         content => $contengo_systemd_file_content,
     }
+
+
+     if ($backup_target_type == 'swift') or ($backup_target_type == 's3') {
+         file { '/etc/systemd/system/tvault-object-store.service':
+             ensure  => present,
+             content => $object_store_systemd_file_content,
+         }
+
+         exec { 'daemon_reload_for_object_store':
+             cwd         => '/tmp',
+             command     => 'systemctl daemon-reload',
+             path        => ['/usr/bin', '/usr/sbin',],
+             subscribe   => File['/etc/systemd/system/tvault-object-store.service'],
+             refreshonly => true,
+          }
+
+     }
+
 
 ##Perform daemon reload if any changes happens in contego systemd file
     exec { 'daemon_reload_for_contego':
@@ -46,5 +103,6 @@ class trilio::contego::contego_postinstall inherits trilio::contego {
         subscribe   => File['/etc/systemd/system/tvault-contego.service'],
         refreshonly => true,
     }
+
 
 }

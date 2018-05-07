@@ -6,19 +6,6 @@ CONTEGO_DIR=$1
 TVAULT_APPLIANCE_IP=$2 
 OPENSTACK_RELEASE=$3
 
-
-##Get OpenStack release information
-#OPENSTACK_RELEASE="premitaka"
-#NOVA_VERSION=`nova-manage version | awk -F. '{print $1}'`
-#if [[ "$NOVA_VERSION" -eq "13"  ]]; then
-#    export OPENSTACK_RELEASE="mitaka"
-#elif [[ "$NOVA_VERSION" -eq "14" ]]; then
-#    export OPENSTACK_RELEASE="newton"
-#else
-#    export OPENSTACK_RELEASE="premitaka"
-#fi
-
-
 export CONTEGO_VERSION=`curl -s http://192.168.1.26:8081/packages/ | grep tvault-contego-[0-9] | awk -F 'tvault-contego-' '{print $2}' | cut -c-5`
 	
    ###Check if current contego package is latest

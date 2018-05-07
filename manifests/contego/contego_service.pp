@@ -10,4 +10,14 @@ class trilio::contego::contego_service inherits trilio::contego {
         hasrestart => true,
     }
 
+    if ($backup_target_type == 'swift') or ($backup_target_type == 's3') {
+        service { 'tvault-object-store':
+            ensure     => running,
+            enable     => true,
+            hasstatus  => true,
+            hasrestart => true,
+         }      
+     }
+
+
 }
