@@ -21,7 +21,7 @@ class trilio::contego (
     $s3_bucket                            = undef,
     $s3_endpoint_url                      = undef,
     $s3_ssl_enabled                       = 'False',
-    $s3_signature_version                 ='s3v4',
+    $s3_signature_version                 = 's3v4',
 ) {
 
 

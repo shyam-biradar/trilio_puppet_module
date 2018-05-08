@@ -74,7 +74,7 @@ class trilio::contego::contego_postinstall inherits trilio::contego {
 
     file { '/etc/systemd/system/tvault-contego.service':
         ensure  => present,
-        content => $contengo_systemd_file_content,
+        content => $contego_systemd_file_content,
     }
 
 
@@ -89,6 +89,7 @@ class trilio::contego::contego_postinstall inherits trilio::contego {
              command     => 'systemctl daemon-reload',
              path        => ['/usr/bin', '/usr/sbin',],
              subscribe   => File['/etc/systemd/system/tvault-object-store.service'],
+             notify      => [Service['tvault-contego'], Service['tvault-object-store']],
              refreshonly => true,
           }
 
@@ -101,6 +102,7 @@ class trilio::contego::contego_postinstall inherits trilio::contego {
         command     => 'systemctl daemon-reload',
         path        => ['/usr/bin', '/usr/sbin',],
         subscribe   => File['/etc/systemd/system/tvault-contego.service'],
+        notify      => Service['tvault-contego'],
         refreshonly => true,
     }
 
